@@ -17,14 +17,13 @@ export default function Home() {
 
       {/* Max-width content container */}
       <div className="max-w-[430px] mx-auto">
-        {/* Sticky tabs below header (top-12 = header height 48px) */}
-        <div className="sticky top-12 z-40">
+        {/* Sticky tabs below header (top-24 = 96px: 로고행 48px + 검색창행 48px) */}
+        <div className="sticky top-24 z-40">
           <CategoryTabs activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
-        {/* Scrollable main content */}
-        {/* pt-12: header height, pb-16: bottom nav height */}
-        <main className="pt-12 pb-16">
+        {/* pt-24: header height(96px), pb-16: bottom nav height */}
+        <main className="pt-24 pb-16">
           <Banner />
           <div className="mt-6" />
           <ProductGrid />
