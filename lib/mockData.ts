@@ -22,6 +22,84 @@ export interface Category {
   name: string;
 }
 
+export interface SubCategory {
+  id: string;
+  name: string;
+  isAll?: boolean;
+}
+
+export interface MainCategory {
+  id: string;
+  name: string;
+  subCategories: SubCategory[];
+}
+
+export const categoryMenus: MainCategory[] = [
+  {
+    id: 'mall',
+    name: '쇼핑몰',
+    subCategories: [
+      { id: 'all', name: '쇼핑몰', isAll: true },
+      { id: 'top', name: '상의' },
+      { id: 'pants', name: '바지' },
+      { id: 'outer', name: '아우터' },
+      { id: 'shoes', name: '신발' },
+      { id: 'hat', name: '모자' },
+      { id: 'fashion', name: '패션소품' },
+      { id: 'bag', name: '가방' },
+      { id: 'inner', name: '이너/홈웨어' },
+      { id: 'windbreaker', name: '바람막이' },
+      { id: 'hoodie', name: '후드집업' },
+      { id: 'cardigan', name: '가디건' },
+      { id: 'blazer', name: '블레이저' },
+      { id: 'safari', name: '야상/사파리' },
+      { id: 'blouson', name: '블루종/트루커' },
+    ],
+  },
+  {
+    id: 'brand',
+    name: '브랜드',
+    subCategories: [
+      { id: 'all', name: '브랜드', isAll: true },
+      { id: 'top', name: '상의' },
+      { id: 'pants', name: '바지' },
+      { id: 'outer', name: '아우터' },
+      { id: 'shoes', name: '신발' },
+      { id: 'hat', name: '모자' },
+      { id: 'fashion', name: '패션소품' },
+      { id: 'bag', name: '가방' },
+      { id: 'inner', name: '이너/홈웨어' },
+      { id: 'windbreaker', name: '바람막이' },
+      { id: 'hoodie', name: '후드집업' },
+      { id: 'cardigan', name: '가디건' },
+      { id: 'blazer', name: '블레이저' },
+      { id: 'safari', name: '야상/사파리' },
+      { id: 'blouson', name: '블루종/트루커' },
+    ],
+  },
+  {
+    id: 'sports',
+    name: '스포츠',
+    subCategories: [
+      { id: 'all', name: '스포츠', isAll: true },
+      { id: 'top', name: '상의' },
+      { id: 'pants', name: '바지' },
+      { id: 'outer', name: '아우터' },
+      { id: 'shoes', name: '신발' },
+      { id: 'hat', name: '모자' },
+      { id: 'accessories', name: '잡화' },
+      { id: 'bag', name: '가방' },
+      { id: 'swimwear', name: '스윔웨어' },
+      { id: 'equipment', name: '스포츠 용품' },
+      { id: 'etc', name: '기타' },
+      { id: 'short-sleeve', name: '반소매 티셔츠' },
+      { id: 'sleeveless', name: '민소매 티셔츠' },
+      { id: 'long-sleeve', name: '긴소매 티셔츠' },
+      { id: 'polo', name: '피케/카라 티셔츠' },
+    ],
+  },
+];
+
 export const categories: Category[] = [
   { id: 'home', name: '홈' },
   { id: 'ranking', name: '랭킹' },
