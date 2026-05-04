@@ -20,7 +20,7 @@
 
 ### UI 컴포넌트
 - **Header** — 로고, 검색, 장바구니 아이콘 (상단 고정)
-- **CategoryTabs** — 홈 · 브랜드 · 쇼핑몰 · 베스트 · 신상품 · 세일 · 쿠폰 탭 (언더라인 애니메이션)
+- **CategoryTabs** — 홈 · 랭킹 · 이벤트 · 쇼핑몰 · 브랜드 · 스포츠 탭 (언더라인 애니메이션)
 - **Banner** — 자동 슬라이드 (3.5초 간격), dots 인디케이터, 카운터 배지
 - **ProductGrid** — 2열 그리드, 정렬 칩, 무한 스크롤
 - **ProductCard** — 1:1 이미지 비율, 찜 하트 토글, 할인율 강조
@@ -52,7 +52,7 @@ IVER/
 │   ├── ProductGrid.tsx
 │   └── BottomNav.tsx
 ├── lib/
-│   └── mockData.ts       # 상품 50개, 배너 5개, 카테고리 9개 mock 데이터
+│   └── mockData.ts       # 상품 50개, 배너 5개, 카테고리 6개 mock 데이터
 ├── next.config.mjs
 ├── tailwind.config.ts
 └── tsconfig.json

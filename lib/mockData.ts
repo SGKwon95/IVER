@@ -24,14 +24,11 @@ export interface Category {
 
 export const categories: Category[] = [
   { id: 'home', name: '홈' },
-  { id: 'brand', name: '브랜드' },
+  { id: 'ranking', name: '랭킹' },
+  { id: 'event', name: '이벤트' },
   { id: 'mall', name: '쇼핑몰' },
-  { id: 'best', name: '베스트' },
-  { id: 'new', name: '신상품' },
-  { id: 'sale', name: '세일' },
-  { id: 'coupon', name: '쿠폰' },
+  { id: 'brand', name: '브랜드' },
   { id: 'sports', name: '스포츠' },
-  { id: 'outdoor', name: '아웃도어' },
 ];
 
 export const banners: Banner[] = [
