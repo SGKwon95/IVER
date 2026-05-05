@@ -42,3 +42,4 @@ next-env.d.ts
 
 # prisma
 # (schema.prisma는 커밋, migrations도 커밋)
+/prisma/migrations/*
