@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
 import type { Product } from '@/lib/mockData';
 
@@ -11,7 +12,33 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
   const [liked, setLiked] = useState(product.isLiked);
+  const [loading, setLoading] = useState(false);
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (loading) return;
+
+    const customerId = localStorage.getItem('customerId');
+    if (!customerId) {
+      router.push('/login');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/likes/product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, productId: product.id }),
+      });
+      const data = await res.json();
+      if (data.success) setLiked(data.liked);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col">
@@ -24,7 +51,8 @@ export default function ProductCard({ product }: ProductCardProps) {
           sizes="(max-width: 430px) 50vw, 215px"
         />
         <button
-          onClick={(e) => { e.preventDefault(); setLiked(!liked); }}
+          onClick={handleLike}
+          disabled={loading}
           className="absolute bottom-2 right-2 w-7 h-7 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform active:scale-90"
           aria-label={liked ? '찜 해제' : '찜하기'}
         >
