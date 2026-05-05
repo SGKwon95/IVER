@@ -28,6 +28,27 @@ model Category {
   @@map("categories")
 }
 
+model Store {
+  id               String    @id @default(cuid())
+  storeName        String    @map("store_name") @db.VarChar(100)
+  storeStatusCode  String    @default("OPEN") @map("store_status_code") @db.VarChar(30)
+  businessName     String?   @map("business_name") @db.VarChar(100)
+  defaultOrderInfo String?   @map("default_order_info")
+  representative   String?   @db.VarChar(50)
+  businessRegNo    String?   @map("business_reg_no") @db.VarChar(20)
+  ecommerceRegNo   String?   @map("ecommerce_reg_no") @db.VarChar(50)
+  businessAddress  String?   @map("business_address") @db.VarChar(300)
+  fashionTypeCode  String?   @map("fashion_type_code") @db.VarChar(30)
+  csHours          String?   @map("cs_hours") @db.VarChar(200)
+  csEmail          String?   @map("cs_email") @db.VarChar(200)
+  csContact        String?   @map("cs_contact") @db.VarChar(20)
+  csKakaoId        String?   @map("cs_kakao_id") @db.VarChar(100)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@map("store")
+}
+
 model CustomerAddress {
   addrNo        BigInt    @id @default(autoincrement()) @map("addr_no")
   customerId    String    @map("customer_id")
@@ -83,8 +104,22 @@ model Customer {
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
   addresses         CustomerAddress[]
+  login             CustomerLogin?
 
   @@map("customer")
+}
+
+model CustomerLogin {
+  id        String   @id @default(cuid())
+  customerId String   @unique @map("customer_id") @db.VarChar(50)
+  loginId   String   @unique @map("login_id") @db.VarChar(100)
+  loginPw   String   @map("login_pw") @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("customer_login")
 }
 
 model CommonCode {
