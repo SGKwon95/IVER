@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'IVER - 아이버',
-  description: '하이버 - 브랜드 패션 최저가 쇼핑몰',
+  description: '아이버 - 쇼핑몰 클론코딩 프로젝트',
 };
 
 export const viewport: Viewport = {
