@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CategoryType {
+  MAIN
+  SUB
+}
+
+model Category {
+  id        String       @id
+  name      String
+  type      CategoryType
+  parentId  String?      @map("parent_id")
+  imageUrl  String?      @map("image_url")
+  sortOrder Int          @default(0) @map("sort_order")
+  isActive  Boolean      @default(true) @map("is_active")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+
+  @@map("categories")
+}
+
+model CodeGroup {
+  groupId     String       @id @map("group_id") @db.VarChar(30)
+  groupName   String       @map("group_name") @db.VarChar(100)
+  description String?
+  sortOrder   Int          @default(0) @map("sort_order")
+  isActive    Boolean      @default(true) @map("is_active")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  codes CommonCode[]
+
+  @@map("code_group")
+}
+
+model Customer {
+  id                String    @id @default(cuid())
+  userTypeCode      String    @default("GENERAL") @map("user_type_code") @db.VarChar(30)
+  customerTypeCode  String    @default("NORMAL") @map("customer_type_code") @db.VarChar(30)
+  memberStatusCode  String    @default("ACTIVE") @map("member_status_code") @db.VarChar(30)
+  custName          String    @map("cust_name") @db.VarChar(100)
+  birthDate         DateTime? @map("birth_date") @db.Date
+  mobileNo          String?   @map("mobile_no") @db.VarChar(20)
+  email             String    @unique @db.VarChar(200)
+  genderCode        String?   @map("gender_code") @db.VarChar(30)
+  height            Decimal?  @db.Decimal(5, 1)
+  weight            Decimal?  @db.Decimal(5, 1)
+  point             Int       @default(0)
+  marketingYn       Boolean   @default(false) @map("marketing_yn")
+  notificationYn    Boolean   @default(false) @map("notification_yn")
+  joinedAt          DateTime  @default(now()) @map("joined_at")
+  dormantAt         DateTime? @map("dormant_at")
+  lastLoginAt       DateTime? @map("last_login_at")
+  withdrawnAt       DateTime? @map("withdrawn_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("customer")
+}
+
+model CommonCode {
+  groupId   String   @map("group_id") @db.VarChar(30)
+  codeId    String   @map("code_id") @db.VarChar(30)
+  codeName  String   @map("code_name") @db.VarChar(100)
+  codeValue String?  @map("code_value") @db.VarChar(200)
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  group CodeGroup @relation(fields: [groupId], references: [groupId], onDelete: Cascade)
+
+  @@id([groupId, codeId])
+  @@map("common_code")
+}
