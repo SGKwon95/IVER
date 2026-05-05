@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Menu, Heart, User } from 'lucide-react';
+import Link from 'next/link';
 
 const navItems = [
   { icon: Home, label: '홈', id: 'home', href: '/' },
@@ -13,6 +13,11 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const customerId = typeof window !== 'undefined' ? localStorage.getItem('customerId') : null;
+
+  const getMypageHref = () => {
+    return customerId ? '/mypage' : '/login';
+  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#121212] border-t border-[#2A2A2A]">
@@ -20,10 +25,11 @@ export default function BottomNav() {
         {navItems.map((item) => {
           const isActive =
             item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+          const href = item.id === 'mypage' ? getMypageHref() : item.href;
           return (
             <Link
               key={item.id}
-              href={item.href}
+              href={href}
               className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-colors"
             >
               <item.icon

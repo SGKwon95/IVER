@@ -12,11 +12,10 @@ enum CategoryType {
 }
 
 model Category {
-  id        String       @id
+  id        String       @id @default(cuid())
   name      String
   type      CategoryType
   parentId  String?      @map("parent_id")
-  imageUrl  String?      @map("image_url")
   sortOrder Int          @default(0) @map("sort_order")
   isActive  Boolean      @default(true) @map("is_active")
   createdAt DateTime     @default(now()) @map("created_at")
@@ -32,7 +31,6 @@ model Store {
   id               String    @id @default(cuid())
   storeName        String    @map("store_name") @db.VarChar(100)
   storeStatusCode  String    @default("OPEN") @map("store_status_code") @db.VarChar(30)
-  businessName     String?   @map("business_name") @db.VarChar(100)
   defaultOrderInfo String?   @map("default_order_info")
   representative   String?   @db.VarChar(50)
   businessRegNo    String?   @map("business_reg_no") @db.VarChar(20)
@@ -46,11 +44,13 @@ model Store {
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
 
+  storeLikes       StoreLike[]
+
   @@map("store")
 }
 
 model CustomerAddress {
-  addrNo        BigInt    @id @default(autoincrement()) @map("addr_no")
+  id            String    @id @default(cuid())
   customerId    String    @map("customer_id")
   recipientName String    @map("recipient_name") @db.VarChar(100)
   postalCode    String    @map("postal_code") @db.VarChar(10)
@@ -65,6 +65,27 @@ model CustomerAddress {
   customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@map("customer_address")
+}
+
+model ProductLike {
+  customerId  String   @map("customer_id")
+  productId   String   @map("product_id")
+
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@id([customerId, productId])
+  @@map("product_like")
+}
+
+model StoreLike {
+  customerId  String   @map("customer_id")
+  storeId     String   @map("store_id")
+
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@id([customerId, storeId])
+  @@map("store_like")
 }
 
 model CodeGroup {
@@ -105,6 +126,8 @@ model Customer {
 
   addresses         CustomerAddress[]
   login             CustomerLogin?
+  productLikes      ProductLike[]
+  storeLikes        StoreLike[]
 
   @@map("customer")
 }

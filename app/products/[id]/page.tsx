@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Heart, Share2, ShoppingBag } from 'lucide-react';
 import { products } from '@/lib/mockData';
@@ -88,9 +89,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             <span className="text-gray-400 w-8 shrink-0">적립</span>
             <div className="flex items-center gap-2">
               <span className="text-black">결제 시 0.5% 적립 ({pointAmount.toLocaleString('ko-KR')}원)</span>
-              <button className="text-[11px] text-gray-400 border border-gray-200 rounded px-1.5 py-[2px]">
+              <Link href="/grade-benefits" className="text-[11px] text-gray-400 border border-gray-200 rounded px-1.5 py-[2px]">
                 등급별 혜택
-              </button>
+              </Link>
             </div>
           </div>
         </div>
