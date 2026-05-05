@@ -12,7 +12,16 @@ export default function ProductGrid() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(products.length > PAGE_SIZE);
   const [loading, setLoading] = useState(false);
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const customerId = localStorage.getItem('customerId');
+    if (!customerId) return;
+    fetch(`/api/likes/product?customerId=${customerId}`)
+      .then((r) => r.json())
+      .then((data) => setLikedIds(new Set(data.productIds)));
+  }, []);
 
   const loadMore = useCallback(() => {
     if (loading || !hasMore) return;
@@ -80,7 +89,7 @@ export default function ProductGrid() {
       {/* Product Grid */}
       <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-3">
         {displayedProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} initialLiked={likedIds.has(product.id)} />
         ))}
       </div>
 

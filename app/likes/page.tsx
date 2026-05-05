@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, ShoppingBag, Heart } from 'lucide-react';
@@ -16,18 +16,34 @@ export default function LikesPage() {
   const [activeTab, setActiveTab] = useState<Tab>('찜한 상품');
   const [activeFilter, setActiveFilter] = useState('전체');
   const [excludeSoldOut, setExcludeSoldOut] = useState(false);
-  const [likedIds, setLikedIds] = useState<Set<string>>(
-    new Set(products.filter((p) => p.isLiked).map((p) => p.id))
-  );
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const customerId = localStorage.getItem('customerId');
+    if (!customerId) return;
+    fetch(`/api/likes/product?customerId=${customerId}`)
+      .then((r) => r.json())
+      .then((data) => setLikedIds(new Set(data.productIds)));
+  }, []);
 
   const likedProducts = products.filter((p) => likedIds.has(p.id));
 
-  const toggleLike = (id: string) => {
-    setLikedIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
+  const toggleLike = async (id: string) => {
+    const customerId = localStorage.getItem('customerId');
+    if (!customerId) return;
+    const res = await fetch('/api/likes/product', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customerId, productId: id }),
     });
+    const data = await res.json();
+    if (data.success) {
+      setLikedIds((prev) => {
+        const next = new Set(prev);
+        data.liked ? next.add(id) : next.delete(id);
+        return next;
+      });
+    }
   };
 
   return (

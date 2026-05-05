@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export async function GET(request: NextRequest) {
+  const customerId = request.nextUrl.searchParams.get('customerId');
+  if (!customerId) return NextResponse.json({ productIds: [] });
+
+  const likes = await prisma.productLike.findMany({
+    where: { customerId },
+    select: { productId: true },
+  });
+
+  return NextResponse.json({ productIds: likes.map((l) => l.productId) });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { customerId, productId } = await request.json();

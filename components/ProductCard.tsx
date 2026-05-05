@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -9,12 +9,17 @@ import type { Product } from '@/lib/mockData';
 
 interface ProductCardProps {
   product: Product;
+  initialLiked?: boolean;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, initialLiked }: ProductCardProps) {
   const router = useRouter();
-  const [liked, setLiked] = useState(product.isLiked);
+  const [liked, setLiked] = useState(initialLiked ?? product.isLiked);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialLiked !== undefined) setLiked(initialLiked);
+  }, [initialLiked]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
