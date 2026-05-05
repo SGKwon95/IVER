@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Grid2X2, Heart, User } from 'lucide-react';
+import { Home, Menu, Heart, User } from 'lucide-react';
 
 const navItems = [
   { icon: Home, label: '홈', id: 'home', href: '/' },
-  { icon: Grid2X2, label: '카테고리', id: 'category', href: '/categories' },
+  { icon: Menu, label: '카테고리', id: 'category', href: '/categories' },
   { icon: Heart, label: '찜', id: 'like', href: '/likes' },
   { icon: User, label: '마이페이지', id: 'mypage', href: '/mypage' },
 ];
