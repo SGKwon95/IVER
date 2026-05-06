@@ -176,8 +176,90 @@ model Product {
 
   store             Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
   category          Category? @relation(fields: [categoryId], references: [id])
+  productColors     ProductColor[]
+  productSizes      ProductSize[]
+  stocks            ProductStock[]
 
   @@map("product")
+}
+
+model Color {
+  id         String   @id @default(cuid())
+  category   String?  @db.VarChar(30)
+  colorName  String   @map("color_name") @db.VarChar(50)
+  sortOrder  Int      @default(0) @map("sort_order")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  productColors ProductColor[]
+  stocks        ProductStock[]
+
+  @@map("color")
+}
+
+model Size {
+  id         String   @id @default(cuid())
+  sizeEn     String   @map("size_en") @db.VarChar(10)
+  sizeKo     String?  @map("size_ko") @db.VarChar(20)
+  sizeValue  Int?     @map("size_value")
+  sortOrder  Int      @default(0) @map("sort_order")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  productSizes ProductSize[]
+  stocks       ProductStock[]
+
+  @@map("size")
+}
+
+model ProductColor {
+  id        String  @id @default(cuid())
+  productId String  @map("product_id")
+  colorId   String  @map("color_id")
+  sortOrder Int     @default(0) @map("sort_order")
+  isActive  Boolean @default(true) @map("is_active")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  color   Color   @relation(fields: [colorId], references: [id])
+
+  @@unique([productId, colorId])
+  @@map("product_color")
+}
+
+model ProductSize {
+  id        String  @id @default(cuid())
+  productId String  @map("product_id")
+  sizeId    String  @map("size_id")
+  sortOrder Int     @default(0) @map("sort_order")
+  isActive  Boolean @default(true) @map("is_active")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size    Size    @relation(fields: [sizeId], references: [id])
+
+  @@unique([productId, sizeId])
+  @@map("product_size")
+}
+
+model ProductStock {
+  id              String   @id @default(cuid())
+  productId       String   @map("product_id")
+  colorId         String?  @map("color_id")
+  sizeId          String?  @map("size_id")
+  stockCount      Int      @default(0) @map("stock_count")
+  additionalPrice Decimal  @default(0) @map("additional_price") @db.Decimal(10, 2)
+  skuCode         String?  @map("sku_code") @db.VarChar(100)
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  color   Color?  @relation(fields: [colorId], references: [id])
+  size    Size?   @relation(fields: [sizeId], references: [id])
+
+  @@unique([productId, colorId, sizeId])
+  @@map("product_stock")
 }
 
 model Event {
