@@ -23,6 +23,7 @@ model Category {
 
   parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
   children Category[] @relation("CategoryHierarchy")
+  products Product[]
 
   @@map("categories")
 }
@@ -45,6 +46,8 @@ model Store {
   updatedAt        DateTime  @updatedAt @map("updated_at")
 
   storeLikes       StoreLike[]
+  tags             Tag[]
+  products         Product[]
 
   @@map("store")
 }
@@ -143,6 +146,38 @@ model CustomerLogin {
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@map("customer_login")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  storeId   String   @map("store_id")
+  tagName   String   @map("tag_name") @db.VarChar(100)
+  tagValue  BigInt   @map("tag_value")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@map("tag")
+}
+
+model Product {
+  id                String    @id @default(cuid())
+  storeId           String    @map("store_id")
+  productStatusCode String    @default("ON_SALE") @map("product_status_code") @db.VarChar(30)
+  categoryId        String?   @map("category_id")
+  productName       String    @map("product_name") @db.VarChar(300)
+  basePrice         Decimal   @map("base_price") @db.Decimal(10, 2)
+  tags              BigInt    @default(0)
+  isActive          Boolean   @default(true) @map("is_active")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  store             Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  category          Category? @relation(fields: [categoryId], references: [id])
+
+  @@map("product")
 }
 
 model CommonCode {
