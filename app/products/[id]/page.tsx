@@ -19,15 +19,17 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const [infoExpanded, setInfoExpanded] = useState(false);
   const [storeName, setStoreName] = useState<string | null>(null);
   const [storeId, setStoreId] = useState<string | null>(null);
-
-  const mockTags = ['반팔티', '오버핏', '봄', '베이직반팔티', '스투시', '스투시반팔', '스투시베이직반팔', '여름', '면', '로고/그래픽', 'S', 'M', 'L', 'XL'];
+  const [tags, setTags] = useState<string[]>([]);
 
   const product = products.find((p) => p.id === params.id) ?? products[0];
 
   useEffect(() => {
     fetch(`/api/products/${params.id}`)
       .then((r) => r.json())
-      .then((data) => { if (data.store) { setStoreName(data.store.storeName); setStoreId(data.store.id); } });
+      .then((data) => {
+        if (data.store) { setStoreName(data.store.storeName); setStoreId(data.store.id); }
+        if (data.tags) setTags(data.tags);
+      });
 
     const customerId = localStorage.getItem('customerId');
     if (!customerId) return;
@@ -199,13 +201,14 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               <div className="px-4 mt-5">
                 <p className="text-[15px] font-bold text-black mb-3">태그</p>
                 <div className="flex flex-wrap gap-2">
-                  {mockTags.map((tag) => (
-                    <button
+                  {tags.map((tag) => (
+                    <Link
                       key={tag}
+                      href={`/tags/${encodeURIComponent(tag)}`}
                       className="px-3 py-1.5 border border-gray-200 rounded-full text-[13px] text-black"
                     >
                       {tag}
-                    </button>
+                    </Link>
                   ))}
                 </div>
               </div>
