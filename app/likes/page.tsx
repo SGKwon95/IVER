@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, ShoppingBag, Heart } from 'lucide-react';
+import { Search, ShoppingCart, Heart } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { products } from '@/lib/mockData';
 
@@ -58,7 +58,7 @@ export default function LikesPage() {
             <div className="flex items-center gap-3">
               <button><Search size={20} className="text-black" strokeWidth={1.8} /></button>
               <button className="relative">
-                <ShoppingBag size={20} className="text-black" strokeWidth={1.8} />
+                <ShoppingCart size={20} className="text-black" strokeWidth={1.8} />
                 <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                   1
                 </span>
@@ -180,7 +180,7 @@ export default function LikesPage() {
         {/* 찜한 스토어 탭 */}
         {activeTab === '찜한 스토어' && (
           <div className="flex flex-col items-center justify-center py-24 text-gray-400">
-            <ShoppingBag size={40} strokeWidth={1.2} className="mb-3" />
+            <ShoppingCart size={40} strokeWidth={1.2} className="mb-3" />
             <p className="text-[14px]">찜한 스토어가 없습니다.</p>
           </div>
         )}

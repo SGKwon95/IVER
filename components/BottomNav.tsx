@@ -20,7 +20,7 @@ export default function BottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#121212] border-t border-[#2A2A2A]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100">
       <div className="max-w-[430px] mx-auto flex">
         {navItems.map((item) => {
           const isActive =
@@ -35,10 +35,10 @@ export default function BottomNav() {
               <item.icon
                 size={22}
                 strokeWidth={isActive ? 2 : 1.5}
-                className={isActive ? 'text-white' : 'text-gray-500'}
+                className={isActive ? 'text-black' : 'text-gray-400'}
                 fill={isActive && item.id === 'like' ? 'currentColor' : 'none'}
               />
-              <span className={`text-[10px] font-medium ${isActive ? 'text-white' : 'text-gray-500'}`}>
+              <span className={`text-[10px] font-medium ${isActive ? 'text-black' : 'text-gray-400'}`}>
                 {item.label}
               </span>
             </Link>

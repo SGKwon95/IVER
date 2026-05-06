@@ -47,7 +47,7 @@ export default function ProductCard({ product, initialLiked }: ProductCardProps)
 
   return (
     <div className="flex flex-col">
-      <Link href={`/products/${product.id}`} className="relative aspect-square rounded-lg overflow-hidden bg-[#1A1A1A] block">
+      <Link href={`/products/${product.id}`} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 block">
         <Image
           src={product.imageUrl}
           alt={product.name}
@@ -71,10 +71,10 @@ export default function ProductCard({ product, initialLiked }: ProductCardProps)
 
       <Link href={`/products/${product.id}`} className="mt-2 px-0.5">
         <p className="text-[11px] text-gray-500 font-medium">{product.brand}</p>
-        <p className="text-[13px] text-white leading-snug mt-0.5 line-clamp-2">{product.name}</p>
+        <p className="text-[13px] text-black leading-snug mt-0.5 line-clamp-2">{product.name}</p>
         <div className="flex items-center gap-1.5 mt-1.5">
           <span className="text-[#FF3B30] text-sm font-bold">{product.discountRate}%</span>
-          <span className="text-white text-sm font-bold">
+          <span className="text-black text-sm font-bold">
             {product.price.toLocaleString('ko-KR')}원
           </span>
         </div>

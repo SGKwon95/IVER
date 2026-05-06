@@ -61,7 +61,7 @@ export default function ProductGrid() {
       {/* Section Header */}
       <div className="flex items-center justify-between px-3 py-3 mt-6">
         <div className="flex items-center gap-2">
-          <h2 className="text-[15px] font-bold text-white">인기 상품</h2>
+          <h2 className="text-[15px] font-bold text-black">인기 상품</h2>
           <span className="text-[11px] text-gray-500">{products.length}개</span>
         </div>
         <button className="flex items-center gap-1.5 text-gray-400 text-[12px]">
@@ -78,7 +78,7 @@ export default function ProductGrid() {
             className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium border transition-colors ${
               i === 0
                 ? 'bg-white text-black border-white'
-                : 'bg-transparent text-gray-400 border-[#2A2A2A]'
+                : 'bg-transparent text-gray-400 border-gray-200'
             }`}
           >
             {sort}

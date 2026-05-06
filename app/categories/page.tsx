@@ -51,7 +51,7 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="bg-[#121212]">
+    <div className="bg-white">
       <Header />
       <BottomNav />
 
@@ -60,7 +60,7 @@ export default function CategoriesPage() {
         style={{ marginTop: '96px', height: 'calc(100dvh - 96px - 58px)' }}
       >
         {/* 좌측 대분류 사이드바 */}
-        <aside className="w-[100px] flex-shrink-0 overflow-y-auto scrollbar-hide bg-[#1A1A1A]">
+        <aside className="w-[100px] flex-shrink-0 overflow-y-auto scrollbar-hide bg-gray-50">
           {categoryMenus.map((cat) => {
             const isActive = cat.id === activeId;
             return (
@@ -69,8 +69,8 @@ export default function CategoriesPage() {
                 onClick={() => handleCategoryClick(cat.id)}
                 className={`w-full py-6 text-[13px] font-medium transition-colors ${
                   isActive
-                    ? 'bg-[#121212] text-white font-bold'
-                    : 'text-gray-500 hover:text-gray-300'
+                    ? 'bg-white text-black font-bold'
+                    : 'text-gray-400 hover:text-gray-600'
                 }`}
               >
                 {cat.name}
@@ -82,7 +82,7 @@ export default function CategoriesPage() {
         {/* 우측: 전체 카테고리 연속 스크롤 */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto scrollbar-hide bg-[#121212]"
+          className="flex-1 overflow-y-auto scrollbar-hide bg-white"
         >
           {categoryMenus.map((cat) => (
             <div
@@ -95,10 +95,10 @@ export default function CategoriesPage() {
               {cat.subCategories.map((sub) => (
                 <button
                   key={`${cat.id}-${sub.id}`}
-                  className="w-full flex items-center justify-between px-5 py-[15px] border-b border-[#1E1E1E]"
+                  className="w-full flex items-center justify-between px-5 py-[15px] border-b border-gray-100"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-semibold text-white">{sub.name}</span>
+                    <span className="text-[14px] font-semibold text-black">{sub.name}</span>
                   </div>
                   <ChevronRight size={15} className="text-gray-600" strokeWidth={1.8} />
                 </button>

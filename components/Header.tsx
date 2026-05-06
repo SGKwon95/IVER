@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, ShoppingBag } from 'lucide-react';
+import { Search, ShoppingCart } from 'lucide-react';
 
 export default function Header() {
   return (
@@ -12,7 +12,7 @@ export default function Header() {
             IVER
           </div>
           <button className="text-white hover:text-gray-300 transition-colors relative" aria-label="장바구니">
-            <ShoppingBag size={20} strokeWidth={1.8} />
+            <ShoppingCart size={20} strokeWidth={1.8} />
             <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
               3
             </span>

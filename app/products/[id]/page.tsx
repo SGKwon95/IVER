@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Heart, Share2, ShoppingBag } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart, Share2, ShoppingCart } from 'lucide-react';
 import { products } from '@/lib/mockData';
 
 const TABS = ['상품정보', '리뷰', '문의', '주문정보'] as const;
@@ -30,7 +30,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           </button>
           <div className="flex items-center gap-3">
             <button className="p-1"><Share2 size={20} className="text-black" strokeWidth={1.8} /></button>
-            <button className="p-1"><ShoppingBag size={20} className="text-black" strokeWidth={1.8} /></button>
+            <button className="p-1"><ShoppingCart size={20} className="text-black" strokeWidth={1.8} /></button>
           </div>
         </div>
 
