@@ -7,12 +7,19 @@ import { useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
 import type { Product } from '@/lib/mockData';
 
+interface EventDiscount {
+  discountType: string;
+  discountValue: number;
+  eventName: string;
+}
+
 interface ProductCardProps {
   product: Product;
   initialLiked?: boolean;
+  eventDiscount?: EventDiscount;
 }
 
-export default function ProductCard({ product, initialLiked }: ProductCardProps) {
+export default function ProductCard({ product, initialLiked, eventDiscount }: ProductCardProps) {
   const router = useRouter();
   const [liked, setLiked] = useState(initialLiked ?? product.isLiked);
   const [loading, setLoading] = useState(false);
@@ -72,15 +79,37 @@ export default function ProductCard({ product, initialLiked }: ProductCardProps)
       <Link href={`/products/${product.id}`} className="mt-2 px-0.5">
         <p className="text-[11px] text-gray-500 font-medium">{product.brand}</p>
         <p className="text-[13px] text-black leading-snug mt-0.5 line-clamp-2">{product.name}</p>
-        <div className="flex items-center gap-1.5 mt-1.5">
-          <span className="text-[#FF3B30] text-sm font-bold">{product.discountRate}%</span>
-          <span className="text-black text-sm font-bold">
-            {product.price.toLocaleString('ko-KR')}원
-          </span>
-        </div>
-        <p className="text-gray-600 text-[11px] line-through mt-0.5">
-          {product.originalPrice.toLocaleString('ko-KR')}원
-        </p>
+        {(() => {
+          if (!eventDiscount) {
+            return (
+              <>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <span className="text-[#FF3B30] text-sm font-bold">{product.discountRate}%</span>
+                  <span className="text-black text-sm font-bold">{product.price.toLocaleString('ko-KR')}원</span>
+                </div>
+                <p className="text-gray-600 text-[11px] line-through mt-0.5">{product.originalPrice.toLocaleString('ko-KR')}원</p>
+              </>
+            );
+          }
+          const eventPrice = eventDiscount.discountType === 'RATE'
+            ? Math.round(product.originalPrice * (1 - eventDiscount.discountValue / 100) / 100) * 100
+            : Math.max(0, product.originalPrice - eventDiscount.discountValue);
+          const eventRate = eventDiscount.discountType === 'RATE'
+            ? eventDiscount.discountValue
+            : Math.round((eventDiscount.discountValue / product.originalPrice) * 100);
+          return (
+            <>
+              <span className="inline-block text-[10px] font-bold text-white bg-[#FF3B30] px-1.5 py-0.5 rounded mt-1.5">
+                {eventDiscount.eventName}
+              </span>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-[#FF3B30] text-sm font-bold">{eventRate}%</span>
+                <span className="text-black text-sm font-bold">{eventPrice.toLocaleString('ko-KR')}원</span>
+              </div>
+              <p className="text-gray-600 text-[11px] line-through mt-0.5">{product.originalPrice.toLocaleString('ko-KR')}원</p>
+            </>
+          );
+        })()}
       </Link>
     </div>
   );

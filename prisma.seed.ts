@@ -8,12 +8,12 @@ async function main() {
   await prisma.category.deleteMany();
 
   const mainCategories = [
-    { id: 'home', name: '홈', type: CategoryType.MAIN, sortOrder: 0, imageUrl: null },
-    { id: 'ranking', name: '랭킹', type: CategoryType.MAIN, sortOrder: 1, imageUrl: null },
-    { id: 'event', name: '이벤트', type: CategoryType.MAIN, sortOrder: 2, imageUrl: null },
-    { id: 'mall', name: '쇼핑몰', type: CategoryType.MAIN, sortOrder: 3, imageUrl: 'category1.png' },
-    { id: 'brand', name: '브랜드', type: CategoryType.MAIN, sortOrder: 4, imageUrl: 'category2.png' },
-    { id: 'sports', name: '스포츠', type: CategoryType.MAIN, sortOrder: 5, imageUrl: 'category3.png' },
+    { id: 'home', name: '홈', type: CategoryType.MAIN, sortOrder: 0 },
+    { id: 'ranking', name: '랭킹', type: CategoryType.MAIN, sortOrder: 1 },
+    { id: 'event', name: '이벤트', type: CategoryType.MAIN, sortOrder: 2 },
+    { id: 'mall', name: '쇼핑몰', type: CategoryType.MAIN, sortOrder: 3 },
+    { id: 'brand', name: '브랜드', type: CategoryType.MAIN, sortOrder: 4 },
+    { id: 'sports', name: '스포츠', type: CategoryType.MAIN, sortOrder: 5 },
   ];
 
   await Promise.all(
@@ -24,7 +24,6 @@ async function main() {
           name: cat.name,
           type: cat.type,
           sortOrder: cat.sortOrder,
-          imageUrl: cat.imageUrl,
           isActive: true,
         },
       })

@@ -13,14 +13,22 @@ export default function ProductGrid() {
   const [hasMore, setHasMore] = useState(products.length > PAGE_SIZE);
   const [loading, setLoading] = useState(false);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const [eventMap, setEventMap] = useState<Map<string, { discountType: string; discountValue: number; eventName: string }>>(new Map());
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const customerId = localStorage.getItem('customerId');
-    if (!customerId) return;
-    fetch(`/api/likes/product?customerId=${customerId}`)
+    if (customerId) {
+      fetch(`/api/likes/product?customerId=${customerId}`)
+        .then((r) => r.json())
+        .then((data) => setLikedIds(new Set(data.productIds)));
+    }
+    fetch('/api/events/active')
       .then((r) => r.json())
-      .then((data) => setLikedIds(new Set(data.productIds)));
+      .then((data: { productId: string; discountType: string; discountValue: number; eventName: string }[]) => {
+        const map = new Map(data.map((e) => [e.productId, { discountType: e.discountType, discountValue: e.discountValue, eventName: e.eventName }]));
+        setEventMap(map);
+      });
   }, []);
 
   const loadMore = useCallback(() => {
@@ -89,7 +97,7 @@ export default function ProductGrid() {
       {/* Product Grid */}
       <div className="grid grid-cols-2 gap-x-2 gap-y-5 px-3">
         {displayedProducts.map((product) => (
-          <ProductCard key={product.id} product={product} initialLiked={likedIds.has(product.id)} />
+          <ProductCard key={product.id} product={product} initialLiked={likedIds.has(product.id)} eventDiscount={eventMap.get(product.id)} />
         ))}
       </div>
 
