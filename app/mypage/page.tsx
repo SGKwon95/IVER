@@ -136,14 +136,6 @@ export default function MyPage() {
           </div>
         </div>
 
-        {/* 적립 배너 */}
-        <button className="w-full mt-5 mx-0 relative overflow-hidden bg-[#7C3AED] flex flex-col items-center justify-center py-5 gap-1">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-4xl select-none">🪙</div>
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-4xl select-none">🪙</div>
-          <p className="text-white text-[16px] font-bold">클릭하고 적립 받으세요!</p>
-          <p className="text-white/80 text-[12px]">매일매일 참여 가능</p>
-        </button>
-
         {/* 쇼핑 정보 */}
         <div className="mt-6 px-4">
           <p className="text-[14px] font-bold text-black mb-3">쇼핑 정보</p>
