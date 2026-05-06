@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Heart, Share2, ShoppingCart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, ShoppingCart, Star, ChevronDown, ArrowUp } from 'lucide-react';
 import { products } from '@/lib/mockData';
 
 const TABS = ['상품정보', '리뷰', '문의', '주문정보'] as const;
@@ -13,10 +13,46 @@ type Tab = typeof TABS[number];
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [liked, setLiked] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('상품정보');
   const [optionOpen, setOptionOpen] = useState(false);
+  const [infoExpanded, setInfoExpanded] = useState(false);
+  const [storeName, setStoreName] = useState<string | null>(null);
+  const [storeId, setStoreId] = useState<string | null>(null);
+
+  const mockTags = ['반팔티', '오버핏', '봄', '베이직반팔티', '스투시', '스투시반팔', '스투시베이직반팔', '여름', '면', '로고/그래픽', 'S', 'M', 'L', 'XL'];
 
   const product = products.find((p) => p.id === params.id) ?? products[0];
+
+  useEffect(() => {
+    fetch(`/api/products/${params.id}`)
+      .then((r) => r.json())
+      .then((data) => { if (data.store) { setStoreName(data.store.storeName); setStoreId(data.store.id); } });
+
+    const customerId = localStorage.getItem('customerId');
+    if (!customerId) return;
+    fetch(`/api/likes/product?customerId=${customerId}`)
+      .then((r) => r.json())
+      .then((data) => setLiked(data.productIds?.includes(params.id) ?? false));
+  }, [params.id]);
+
+  const handleLike = async () => {
+    if (likeLoading) return;
+    const customerId = localStorage.getItem('customerId');
+    if (!customerId) { router.push('/login'); return; }
+    setLikeLoading(true);
+    try {
+      const res = await fetch('/api/likes/product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, productId: params.id }),
+      });
+      const data = await res.json();
+      if (data.success) setLiked(data.liked);
+    } finally {
+      setLikeLoading(false);
+    }
+  };
   const pointAmount = Math.floor(product.price * 0.005);
 
   return (
@@ -119,36 +155,59 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         </div>
 
         {/* 탭 콘텐츠 */}
-        <div className="px-4 py-5">
+        <div className="py-5">
           {activeTab === '상품정보' && (
-            <div className="flex flex-col gap-4">
-              <p className="text-[12px] text-gray-400 text-center flex items-center justify-center gap-1">
+            <div className="flex flex-col">
+              <p className="text-[12px] text-gray-400 text-center flex items-center justify-center gap-1 px-4 mb-4">
                 <span>☜</span> 이미지를 확대할 수 있습니다
               </p>
-              {/* 판매자 정보 */}
-              <div className="border border-gray-100 rounded-lg p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-[10px] text-gray-500 font-bold">
-                    JQA<br/>TRADE
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-bold text-black">리셀 가능한 정품 병행수입 판매업체</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">공식 파트너 판매점</p>
-                  </div>
+
+              {/* 상품 상세 이미지 */}
+              <div className={`overflow-hidden transition-all ${infoExpanded ? '' : 'max-h-[400px]'}`}>
+                <div className="relative w-full aspect-square bg-gray-100">
+                  <Image src={product.imageUrl} alt={product.name} fill className="object-cover" sizes="430px" />
                 </div>
-                <p className="text-[12px] text-gray-500 leading-relaxed">
-                  (주)조아무역은 2008년부터 정상적인 유통 경로를 통하여 엄격한 세관을 통과한 한 번에 가품 가능이 없는, 정품만을 판매하는 정식인증 기업입니다.
-                </p>
+                <div className="relative w-full aspect-square bg-gray-100 mt-1">
+                  <Image src={product.imageUrl} alt={product.name} fill className="object-cover" sizes="430px" />
+                </div>
               </div>
-              {/* 상품 이미지 추가 */}
-              <div className="relative w-full aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                <Image
-                  src={product.imageUrl}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  sizes="430px"
-                />
+
+              {/* 상품정보 더보기 버튼 */}
+              <button
+                onClick={() => setInfoExpanded((v) => !v)}
+                className="mx-4 mt-4 h-[48px] border border-gray-200 rounded-md flex items-center justify-center gap-2 text-[14px] text-black font-medium"
+              >
+                상품정보 더보기
+                <ChevronDown size={16} className={`text-gray-500 transition-transform ${infoExpanded ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* 판매자 */}
+              <div className="flex items-center justify-between px-4 mt-5 py-3 border-t border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-gray-500 border border-gray-200 rounded px-1.5 py-[2px]">판매자</span>
+                  <span className="text-[14px] font-bold text-black">{storeName ?? '...'}</span>
+                </div>
+                <Link
+                  href={storeId ? `/stores/${storeId}` : '#'}
+                  className="flex items-center gap-0.5 text-[12px] text-gray-500"
+                >
+                  스토어 홈 <ChevronRight size={14} className="text-gray-400" />
+                </Link>
+              </div>
+
+              {/* 태그 */}
+              <div className="px-4 mt-5">
+                <p className="text-[15px] font-bold text-black mb-3">태그</p>
+                <div className="flex flex-wrap gap-2">
+                  {mockTags.map((tag) => (
+                    <button
+                      key={tag}
+                      className="px-3 py-1.5 border border-gray-200 rounded-full text-[13px] text-black"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -182,16 +241,25 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
       </div>
 
+      {/* 맨위로 버튼 */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="fixed bottom-24 right-4 z-40 w-10 h-10 bg-white border border-gray-200 rounded-full shadow-sm flex items-center justify-center"
+      >
+        <ArrowUp size={18} className="text-gray-600" />
+      </button>
+
       {/* 하단 고정 바 */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100">
         <div className="max-w-[430px] mx-auto flex items-center gap-3 px-4 py-3">
           <button
-            onClick={() => setLiked((v) => !v)}
+            onClick={handleLike}
+            disabled={likeLoading}
             className="w-12 h-12 border border-gray-200 rounded-md flex items-center justify-center shrink-0"
           >
-            <Heart
+            <Star
               size={22}
-              className={liked ? 'text-red-500' : 'text-gray-400'}
+              className={liked ? 'text-yellow-400' : 'text-gray-400'}
               fill={liked ? 'currentColor' : 'none'}
             />
           </button>
