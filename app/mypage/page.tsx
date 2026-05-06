@@ -75,10 +75,10 @@ export default function MyPage() {
             </svg>
           </div>
           <div className="flex-1">
-            <button className="flex items-center gap-1" onClick={() => {}}>
+            <Link href="/mypage/edit" className="flex items-center gap-1">
               <span className="text-[16px] font-bold text-black">{customer?.custName ?? '...'}</span>
               <ChevronRight size={16} className="text-gray-400" />
-            </button>
+            </Link>
             <p className="text-[12px] text-[#C8A97E] font-medium mt-0.5">{gradeLabel}</p>
           </div>
         </div>
