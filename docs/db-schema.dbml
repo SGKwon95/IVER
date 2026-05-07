@@ -1,0 +1,223 @@
+// Hiver 쇼핑몰 DB 스키마
+// dbdiagram.io 에서 붙여넣기하여 사용
+
+Table customer {
+  id varchar [pk]
+  user_type_code varchar(30) [default: "GENERAL"]
+  customer_type_code varchar(30) [default: "NORMAL"]
+  member_status_code varchar(30) [default: "ACTIVE"]
+  cust_name varchar(100) [not null]
+  birth_date date
+  mobile_no varchar(20)
+  email varchar(200) [unique, not null]
+  gender_code varchar(30)
+  height decimal(5,1)
+  weight decimal(5,1)
+  point int [default: 0]
+  marketing_yn boolean [default: false]
+  notification_yn boolean [default: false]
+  joined_at timestamp [default: `now()`]
+  dormant_at timestamp
+  last_login_at timestamp
+  withdrawn_at timestamp
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table customer_login {
+  id varchar [pk]
+  customer_id varchar(50) [unique, not null, ref: - customer.id]
+  login_id varchar(100) [unique, not null]
+  login_pw varchar(200) [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table customer_address {
+  id varchar [pk]
+  customer_id varchar [not null, ref: > customer.id]
+  recipient_name varchar(100) [not null]
+  postal_code varchar(10) [not null]
+  address varchar(300) [not null]
+  address_detail varchar(200)
+  contact_no varchar(20)
+  delivery_memo varchar(500)
+  is_default boolean [default: false]
+  is_active boolean [default: true]
+  updated_at timestamp
+}
+
+Table store {
+  id varchar [pk]
+  store_name varchar(100) [not null]
+  store_status_code varchar(30) [default: "OPEN"]
+  default_order_info text
+  representative varchar(50)
+  business_reg_no varchar(20)
+  ecommerce_reg_no varchar(50)
+  business_address varchar(300)
+  fashion_type_code varchar(30)
+  cs_hours varchar(200)
+  cs_email varchar(200)
+  cs_contact varchar(20)
+  cs_kakao_id varchar(100)
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table categories {
+  id varchar [pk]
+  name varchar [not null]
+  type varchar [not null, note: "MAIN | SUB"]
+  parent_id varchar [ref: > categories.id]
+  sort_order int [default: 0]
+  is_active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table product {
+  id varchar [pk]
+  store_id varchar [not null, ref: > store.id]
+  category_id varchar [ref: > categories.id]
+  product_status_code varchar(30) [default: "ON_SALE"]
+  product_name varchar(300) [not null]
+  base_price decimal(10,2) [not null]
+  tags bigint [default: 0, note: "태그 비트마스크 (tag.tag_value OR 합산)"]
+  is_active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table color {
+  id varchar [pk]
+  category varchar(30) [note: "색상 계열 (RED, BLUE 등)"]
+  color_name varchar(50) [not null]
+  sort_order int [default: 0]
+  is_active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table size {
+  id varchar [pk]
+  size_en varchar(10) [not null, note: "S, M, L, XL 등"]
+  size_ko varchar(20)
+  size_value int [note: "정렬용 수치값"]
+  sort_order int [default: 0]
+  is_active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table product_color {
+  id varchar [pk]
+  product_id varchar [not null, ref: > product.id]
+  color_id varchar [not null, ref: > color.id]
+  sort_order int [default: 0]
+  is_active boolean [default: true]
+
+  indexes {
+    (product_id, color_id) [unique]
+  }
+}
+
+Table product_size {
+  id varchar [pk]
+  product_id varchar [not null, ref: > product.id]
+  size_id varchar [not null, ref: > size.id]
+  sort_order int [default: 0]
+  is_active boolean [default: true]
+
+  indexes {
+    (product_id, size_id) [unique]
+  }
+}
+
+Table product_stock {
+  id varchar [pk]
+  product_id varchar [not null, ref: > product.id]
+  color_id varchar [ref: > color.id]
+  size_id varchar [ref: > size.id]
+  stock_count int [default: 0]
+  additional_price decimal(10,2) [default: 0]
+is_active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+
+  indexes {
+    (product_id, color_id, size_id) [unique]
+  }
+}
+
+Table product_like {
+  customer_id varchar [not null, ref: > customer.id]
+  product_id varchar [not null, note: "mockData ID (product-1 형태), FK 없음"]
+
+  indexes {
+    (customer_id, product_id) [pk]
+  }
+}
+
+Table store_like {
+  customer_id varchar [not null, ref: > customer.id]
+  store_id varchar [not null, ref: > store.id]
+
+  indexes {
+    (customer_id, store_id) [pk]
+  }
+}
+
+Table tag {
+  id varchar [pk]
+  store_id varchar [not null, ref: > store.id]
+  tag_name varchar(100) [not null]
+  tag_value bigint [not null, note: "반드시 2의 거듭제곱 (1, 2, 4, 8...)"]
+  is_active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table event {
+  id varchar [pk]
+  event_name varchar(200) [not null]
+  event_type_code varchar(30) [default: "TIMESALE"]
+  start_at timestamp [not null]
+  end_at timestamp [not null]
+  is_active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table event_product {
+  id varchar [pk]
+  event_id varchar [not null, ref: > event.id]
+  product_id varchar [not null, note: "mockData ID, FK 없음"]
+  discount_type varchar(10) [default: "RATE", note: "RATE(비율) | AMOUNT(정액)"]
+  discount_value decimal(10,2) [not null]
+}
+
+Table code_group {
+  group_id varchar(30) [pk]
+  group_name varchar(100) [not null]
+  description text
+  sort_order int [default: 0]
+  is_active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table common_code {
+  group_id varchar(30) [not null, ref: > code_group.group_id]
+  code_id varchar(30) [not null]
+  code_name varchar(100) [not null]
+  code_value varchar(200)
+  sort_order int [default: 0]
+  is_active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+
+  indexes {
+    (group_id, code_id) [pk]
+  }
+}
