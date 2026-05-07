@@ -4,22 +4,35 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Share2, ShoppingCart, Star, ChevronDown, ArrowUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, ShoppingCart, Star, ChevronDown, ArrowUp, X, Minus, Plus } from 'lucide-react';
 import { products } from '@/lib/mockData';
 
 const TABS = ['상품정보', '리뷰', '문의', '주문정보'] as const;
 type Tab = typeof TABS[number];
+
+interface ColorOption { id: string; colorName: string; category: string | null; }
+interface SizeOption { id: string; sizeEn: string; sizeKo: string | null; }
+interface StockItem { colorId: string | null; sizeId: string | null; stockCount: number; additionalPrice: number; }
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [liked, setLiked] = useState(false);
   const [likeLoading, setLikeLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('상품정보');
-  const [optionOpen, setOptionOpen] = useState(false);
   const [infoExpanded, setInfoExpanded] = useState(false);
   const [storeName, setStoreName] = useState<string | null>(null);
   const [storeId, setStoreId] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
+
+  // 옵션 바텀시트
+  const [showSheet, setShowSheet] = useState(false);
+  const [colors, setColors] = useState<ColorOption[]>([]);
+  const [sizes, setSizes] = useState<SizeOption[]>([]);
+  const [stocks, setStocks] = useState<StockItem[]>([]);
+  const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
+  const [selectedSize, setSelectedSize] = useState<SizeOption | null>(null);
+  const [qty, setQty] = useState(1);
+  const [optionsLoaded, setOptionsLoaded] = useState(false);
 
   const product = products.find((p) => p.id === params.id) ?? products[0];
 
@@ -38,6 +51,55 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       .then((data) => setLiked(data.productIds?.includes(params.id) ?? false));
   }, [params.id]);
 
+  const loadOptions = async () => {
+    if (optionsLoaded) return;
+    const data = await fetch(`/api/products/${params.id}/options`).then((r) => r.json());
+    setColors(data.colors ?? []);
+    setSizes(data.sizes ?? []);
+    setStocks(data.stocks ?? []);
+    setOptionsLoaded(true);
+  };
+
+  const openSheet = async () => {
+    await loadOptions();
+    setQty(1);
+    setSelectedColor(null);
+    setSelectedSize(null);
+    setShowSheet(true);
+  };
+
+  const currentStock = stocks.find(
+    (s) =>
+      (colors.length === 0 || s.colorId === (selectedColor?.id ?? null)) &&
+      (sizes.length === 0 || s.sizeId === (selectedSize?.id ?? null))
+  );
+  const additionalPrice = currentStock?.additionalPrice ?? 0;
+  const unitPrice = product.price + additionalPrice;
+  const totalPrice = unitPrice * qty;
+
+  const canOrder =
+    (colors.length === 0 || selectedColor !== null) &&
+    (sizes.length === 0 || selectedSize !== null) &&
+    (currentStock === undefined || currentStock.stockCount > 0) &&
+    (stocks.length === 0 || currentStock !== undefined);
+
+  const handleOrder = () => {
+    const customerId = localStorage.getItem('customerId');
+    if (!customerId) { router.push('/login'); return; }
+
+    sessionStorage.setItem('orderDraft', JSON.stringify({
+      productId: params.id,
+      productName: product.name,
+      brand: product.brand,
+      imageUrl: product.imageUrl,
+      colorName: selectedColor?.colorName ?? null,
+      sizeName: selectedSize?.sizeEn ?? null,
+      quantity: qty,
+      unitPrice,
+    }));
+    router.push('/order');
+  };
+
   const handleLike = async () => {
     if (likeLoading) return;
     const customerId = localStorage.getItem('customerId');
@@ -55,6 +117,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       setLikeLoading(false);
     }
   };
+
   const pointAmount = Math.floor(product.price * 0.005);
 
   return (
@@ -74,48 +137,19 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
         {/* 상품 이미지 */}
         <div className="relative w-full aspect-square bg-gray-100">
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover"
-            sizes="430px"
-          />
+          <Image src={product.imageUrl} alt={product.name} fill className="object-cover" sizes="430px" />
         </div>
 
         {/* 브랜드 & 상품명 & 가격 */}
         <div className="px-4 pt-4 pb-3 border-b border-gray-100">
           <p className="text-[12px] text-gray-400 font-medium mb-1">{product.brand}</p>
-          <h1 className="text-[15px] text-black font-medium leading-snug mb-3">
-            {product.name}
-          </h1>
+          <h1 className="text-[15px] text-black font-medium leading-snug mb-3">{product.name}</h1>
           <div className="flex items-center gap-2">
             <span className="text-[#FF3B30] text-[18px] font-bold">{product.discountRate}%</span>
-            <span className="text-black text-[22px] font-bold">
-              {product.price.toLocaleString('ko-KR')}원
-            </span>
+            <span className="text-black text-[22px] font-bold">{product.price.toLocaleString('ko-KR')}원</span>
           </div>
-          <p className="text-gray-400 text-[13px] line-through mt-0.5">
-            {product.originalPrice.toLocaleString('ko-KR')}원
-          </p>
+          <p className="text-gray-400 text-[13px] line-through mt-0.5">{product.originalPrice.toLocaleString('ko-KR')}원</p>
         </div>
-
-        {/* 옵션 선택 */}
-        <button
-          onClick={() => setOptionOpen((v) => !v)}
-          className="mx-4 mt-3 flex items-center justify-between px-4 h-[48px] border border-gray-200 rounded-md"
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] text-black">예약구매가</span>
-            <span className="text-[10px] text-gray-400 border border-gray-300 rounded-full px-1.5 py-[1px]">①</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-semibold text-black">
-              {product.price.toLocaleString('ko-KR')}원
-            </span>
-            <ChevronRight size={16} className={`text-gray-400 transition-transform ${optionOpen ? 'rotate-90' : ''}`} />
-          </div>
-        </button>
 
         {/* 배송 & 적립 */}
         <div className="mx-4 mt-3 flex flex-col gap-2 text-[13px] pb-3 border-b border-gray-100">
@@ -143,14 +177,10 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-3 text-[13px] font-medium relative transition-colors ${
-                  isActive ? 'text-black' : 'text-gray-400'
-                }`}
+                className={`flex-1 py-3 text-[13px] font-medium relative transition-colors ${isActive ? 'text-black' : 'text-gray-400'}`}
               >
                 {label}
-                {isActive && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black" />
-                )}
+                {isActive && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black" />}
               </button>
             );
           })}
@@ -163,8 +193,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               <p className="text-[12px] text-gray-400 text-center flex items-center justify-center gap-1 px-4 mb-4">
                 <span>☜</span> 이미지를 확대할 수 있습니다
               </p>
-
-              {/* 상품 상세 이미지 */}
               <div className={`overflow-hidden transition-all ${infoExpanded ? '' : 'max-h-[400px]'}`}>
                 <div className="relative w-full aspect-square bg-gray-100">
                   <Image src={product.imageUrl} alt={product.name} fill className="object-cover" sizes="430px" />
@@ -173,8 +201,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   <Image src={product.imageUrl} alt={product.name} fill className="object-cover" sizes="430px" />
                 </div>
               </div>
-
-              {/* 상품정보 더보기 버튼 */}
               <button
                 onClick={() => setInfoExpanded((v) => !v)}
                 className="mx-4 mt-4 h-[48px] border border-gray-200 rounded-md flex items-center justify-center gap-2 text-[14px] text-black font-medium"
@@ -182,31 +208,20 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 상품정보 더보기
                 <ChevronDown size={16} className={`text-gray-500 transition-transform ${infoExpanded ? 'rotate-180' : ''}`} />
               </button>
-
-              {/* 판매자 */}
               <div className="flex items-center justify-between px-4 mt-5 py-3 border-t border-b border-gray-100">
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-gray-500 border border-gray-200 rounded px-1.5 py-[2px]">판매자</span>
                   <span className="text-[14px] font-bold text-black">{storeName ?? '...'}</span>
                 </div>
-                <Link
-                  href={storeId ? `/stores/${storeId}` : '#'}
-                  className="flex items-center gap-0.5 text-[12px] text-gray-500"
-                >
+                <Link href={storeId ? `/stores/${storeId}` : '#'} className="flex items-center gap-0.5 text-[12px] text-gray-500">
                   스토어 홈 <ChevronRight size={14} className="text-gray-400" />
                 </Link>
               </div>
-
-              {/* 태그 */}
               <div className="px-4 mt-5">
                 <p className="text-[15px] font-bold text-black mb-3">태그</p>
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag) => (
-                    <Link
-                      key={tag}
-                      href={`/tags/${encodeURIComponent(tag)}`}
-                      className="px-3 py-1.5 border border-gray-200 rounded-full text-[13px] text-black"
-                    >
+                    <Link key={tag} href={`/tags/${encodeURIComponent(tag)}`} className="px-3 py-1.5 border border-gray-200 rounded-full text-[13px] text-black">
                       {tag}
                     </Link>
                   ))}
@@ -225,7 +240,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             </div>
           )}
           {activeTab === '주문정보' && (
-            <div className="flex flex-col gap-3 text-[13px]">
+            <div className="flex flex-col gap-3 px-4 text-[13px]">
               {[
                 ['결제수단', '신용카드, 카카오페이, 네이버페이, 무통장입금'],
                 ['배송방법', '택배 (CJ대한통운)'],
@@ -241,7 +256,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             </div>
           )}
         </div>
-
       </div>
 
       {/* 맨위로 버튼 */}
@@ -260,17 +274,126 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             disabled={likeLoading}
             className="w-12 h-12 border border-gray-200 rounded-md flex items-center justify-center shrink-0"
           >
-            <Star
-              size={22}
-              className={liked ? 'text-yellow-400' : 'text-gray-400'}
-              fill={liked ? 'currentColor' : 'none'}
-            />
+            <Star size={22} className={liked ? 'text-yellow-400' : 'text-gray-400'} fill={liked ? 'currentColor' : 'none'} />
           </button>
-          <button className="flex-1 h-12 bg-[#1A1A1A] text-white text-[15px] font-semibold rounded-md">
+          <button
+            onClick={openSheet}
+            className="flex-1 h-12 bg-[#1A1A1A] text-white text-[15px] font-semibold rounded-md"
+          >
             구매하기
           </button>
         </div>
       </div>
+
+      {/* 옵션 선택 바텀시트 */}
+      {showSheet && (
+        <>
+          <div className="fixed inset-0 bg-black/40 z-50" onClick={() => setShowSheet(false)} />
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl max-w-[430px] mx-auto">
+            <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-100">
+              <p className="text-[14px] font-semibold text-black truncate pr-4">{product.name}</p>
+              <button onClick={() => setShowSheet(false)}>
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="px-4 py-4 flex flex-col gap-5 max-h-[70vh] overflow-y-auto">
+              {/* 색상 선택 */}
+              {colors.length > 0 && (
+                <div>
+                  <p className="text-[13px] font-semibold text-black mb-2">색상</p>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => { setSelectedColor(c); setSelectedSize(null); }}
+                        className={`px-3 py-1.5 rounded-full border text-[13px] transition-colors ${
+                          selectedColor?.id === c.id
+                            ? 'border-black bg-black text-white'
+                            : 'border-gray-200 text-black'
+                        }`}
+                      >
+                        {c.colorName}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 사이즈 선택 */}
+              {sizes.length > 0 && (
+                <div>
+                  <p className="text-[13px] font-semibold text-black mb-2">사이즈</p>
+                  <div className="flex flex-wrap gap-2">
+                    {sizes.map((s) => {
+                      const stock = stocks.find(
+                        (st) => st.sizeId === s.id && (colors.length === 0 || st.colorId === (selectedColor?.id ?? null))
+                      );
+                      const soldOut = stock ? stock.stockCount === 0 : false;
+                      return (
+                        <button
+                          key={s.id}
+                          disabled={soldOut}
+                          onClick={() => setSelectedSize(s)}
+                          className={`w-12 h-10 rounded-md border text-[13px] transition-colors ${
+                            soldOut
+                              ? 'border-gray-100 text-gray-300 cursor-not-allowed'
+                              : selectedSize?.id === s.id
+                              ? 'border-black bg-black text-white'
+                              : 'border-gray-200 text-black'
+                          }`}
+                        >
+                          {s.sizeEn}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* 수량 */}
+              <div>
+                <p className="text-[13px] font-semibold text-black mb-2">수량</p>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    className="w-8 h-8 border border-gray-200 rounded-md flex items-center justify-center"
+                  >
+                    <Minus size={14} className="text-black" />
+                  </button>
+                  <span className="text-[15px] font-semibold text-black inline-block w-8 text-center">{qty}</span>
+                  <button
+                    onClick={() => setQty((q) => q + 1)}
+                    className="w-8 h-8 border border-gray-200 rounded-md flex items-center justify-center"
+                  >
+                    <Plus size={14} className="text-black" />
+                  </button>
+                </div>
+              </div>
+
+              {/* 총 금액 */}
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                <span className="text-[13px] text-gray-500">총 금액</span>
+                <span className="text-[18px] font-bold text-black">{totalPrice.toLocaleString('ko-KR')}원</span>
+              </div>
+            </div>
+
+            <div className="px-4 pb-6 pt-2">
+              <button
+                onClick={handleOrder}
+                disabled={!canOrder && stocks.length > 0}
+                className={`w-full h-12 rounded-md text-[15px] font-semibold transition-colors ${
+                  !canOrder && stocks.length > 0
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-[#1A1A1A] text-white'
+                }`}
+              >
+                {currentStock?.stockCount === 0 ? '품절' : '주문하기'}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

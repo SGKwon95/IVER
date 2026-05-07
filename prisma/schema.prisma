@@ -131,6 +131,7 @@ model Customer {
   login             CustomerLogin?
   productLikes      ProductLike[]
   storeLikes        StoreLike[]
+  orders            Order[]
 
   @@map("customer")
 }
@@ -302,4 +303,40 @@ model CommonCode {
 
   @@id([groupId, codeId])
   @@map("common_code")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  customerId      String      @map("customer_id")
+  orderStatusCode String      @default("PENDING") @map("order_status_code") @db.VarChar(30)
+  totalPrice      Decimal     @map("total_price") @db.Decimal(10, 2)
+  recipientName   String      @map("recipient_name") @db.VarChar(100)
+  postalCode      String      @map("postal_code") @db.VarChar(10)
+  address         String      @db.VarChar(300)
+  addressDetail   String?     @map("address_detail") @db.VarChar(200)
+  contactNo       String?     @map("contact_no") @db.VarChar(20)
+  deliveryMemo    String?     @map("delivery_memo") @db.VarChar(500)
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  customer        Customer    @relation(fields: [customerId], references: [id])
+  items           OrderItem[]
+
+  @@map("order")
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String  @map("order_id")
+  productId   String  @map("product_id")
+  productName String  @map("product_name") @db.VarChar(300)
+  colorName   String? @map("color_name") @db.VarChar(50)
+  sizeName    String? @map("size_name") @db.VarChar(20)
+  quantity    Int
+  unitPrice   Decimal @map("unit_price") @db.Decimal(10, 2)
+  totalPrice  Decimal @map("total_price") @db.Decimal(10, 2)
+
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_item")
 }
