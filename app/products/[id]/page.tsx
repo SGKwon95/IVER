@@ -23,6 +23,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const [storeName, setStoreName] = useState<string | null>(null);
   const [storeId, setStoreId] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
+  const [eventDiscount, setEventDiscount] = useState<{ discountType: string; discountValue: number; eventName: string } | null>(null);
 
   // 옵션 바텀시트
   const [showSheet, setShowSheet] = useState(false);
@@ -42,6 +43,13 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       .then((data) => {
         if (data.store) { setStoreName(data.store.storeName); setStoreId(data.store.id); }
         if (data.tags) setTags(data.tags);
+      });
+
+    fetch('/api/events/active')
+      .then((r) => r.json())
+      .then((data: { productId: string; discountType: string; discountValue: number; eventName: string }[]) => {
+        const ev = data.find((e) => e.productId === params.id);
+        if (ev) setEventDiscount({ discountType: ev.discountType, discountValue: ev.discountValue, eventName: ev.eventName });
       });
 
     const customerId = localStorage.getItem('customerId');
@@ -68,13 +76,24 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     setShowSheet(true);
   };
 
+  const displayPrice = eventDiscount
+    ? eventDiscount.discountType === 'RATE'
+      ? Math.round(product.originalPrice * (1 - eventDiscount.discountValue / 100) / 100) * 100
+      : Math.max(0, product.originalPrice - eventDiscount.discountValue)
+    : product.price;
+  const displayRate = eventDiscount
+    ? eventDiscount.discountType === 'RATE'
+      ? eventDiscount.discountValue
+      : Math.round((eventDiscount.discountValue / product.originalPrice) * 100)
+    : product.discountRate;
+
   const currentStock = stocks.find(
     (s) =>
       (colors.length === 0 || s.colorId === (selectedColor?.id ?? null)) &&
       (sizes.length === 0 || s.sizeId === (selectedSize?.id ?? null))
   );
   const additionalPrice = currentStock?.additionalPrice ?? 0;
-  const unitPrice = product.price + additionalPrice;
+  const unitPrice = displayPrice + additionalPrice;
   const totalPrice = unitPrice * qty;
 
   const canOrder =
@@ -118,7 +137,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     }
   };
 
-  const pointAmount = Math.floor(product.price * 0.005);
+  const pointAmount = Math.floor(displayPrice * 0.005);
 
   return (
     <div className="bg-white min-h-screen flex flex-col">
@@ -144,9 +163,14 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         <div className="px-4 pt-4 pb-3 border-b border-gray-100">
           <p className="text-[12px] text-gray-400 font-medium mb-1">{product.brand}</p>
           <h1 className="text-[15px] text-black font-medium leading-snug mb-3">{product.name}</h1>
+          {eventDiscount && (
+            <span className="inline-block text-[11px] font-bold text-white bg-[#FF3B30] px-2 py-0.5 rounded mb-2">
+              {eventDiscount.eventName}
+            </span>
+          )}
           <div className="flex items-center gap-2">
-            <span className="text-[#FF3B30] text-[18px] font-bold">{product.discountRate}%</span>
-            <span className="text-black text-[22px] font-bold">{product.price.toLocaleString('ko-KR')}원</span>
+            <span className="text-[#FF3B30] text-[18px] font-bold">{displayRate}%</span>
+            <span className="text-black text-[22px] font-bold">{displayPrice.toLocaleString('ko-KR')}원</span>
           </div>
           <p className="text-gray-400 text-[13px] line-through mt-0.5">{product.originalPrice.toLocaleString('ko-KR')}원</p>
         </div>
